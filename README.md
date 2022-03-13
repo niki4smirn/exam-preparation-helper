@@ -1,1 +1,1 @@
-# qt-lab3
+# ExamPreparationHelper
