@@ -264,6 +264,6 @@ void MainWindow::UpdateQuestionTypeCounts(
 }
 
 void MainWindow::UpdateProgressBars() {
-  total_progress_->setValue(questions_list_->count() - default_count_);
+  total_progress_->setValue(count_->value() - default_count_);
   green_progress_->setValue(green_count_);
 }
