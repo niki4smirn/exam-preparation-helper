@@ -129,6 +129,8 @@ void MainWindow::SetupMainLayout() {
 
   total_progress_ = new QProgressBar(widget_);
   green_progress_ = new QProgressBar(widget_);
+  total_progress_->setValue(0);
+  green_progress_->setValue(0);
 
   question_view_->setVisible(false);
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include <QComboBox>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -10,12 +8,14 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QProgressBar>
-#include <QProgressBar>
 #include <QPushButton>
 #include <QSpinBox>
 
+#include <optional>
+
 class MainWindow : public QMainWindow {
- Q_OBJECT
+  Q_OBJECT
+
  public:
   MainWindow();
 
