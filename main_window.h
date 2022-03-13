@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QSpinBox>
+#include <QPushButton>
 
 class MainWindow : public QMainWindow {
  Q_OBJECT
@@ -30,6 +31,8 @@ class MainWindow : public QMainWindow {
   void UpdateQuestionStatus(QListWidgetItem* item, QuestionStatus status);
   void UpdateQuestionName(QListWidgetItem* item, const QString& new_name);
 
+  static QuestionStatus GetStatus(QListWidgetItem* item);
+
   void ChooseNewItem(int index);
 
   QWidget* widget_;
@@ -43,6 +46,8 @@ class MainWindow : public QMainWindow {
   QLabel* question_name_;
   QLineEdit* question_name_edit_;
   QComboBox* question_status_;
+
+  QPushButton* next_question_;
 
   QSize minimal_size_{500, 500};
 };

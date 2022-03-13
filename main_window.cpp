@@ -1,3 +1,4 @@
+#include <random>
 #include "main_window.h"
 
 MainWindow::MainWindow() :
@@ -10,6 +11,17 @@ MainWindow::MainWindow() :
 
   setCentralWidget(widget_);
   ConnectWidgets();
+}
+
+template<typename Iter>
+Iter SelectRandomly(Iter start, Iter end) {
+  if (start == end) {
+    return end;
+  }
+  static std::mt19937 gen{std::random_device()()};
+  std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
+  std::advance(start, dis(gen));
+  return start;
 }
 
 void MainWindow::ConnectWidgets() {
@@ -72,6 +84,20 @@ void MainWindow::ConnectWidgets() {
         }
       });
 
+  connect(next_question_,
+          &QPushButton::clicked, [&]() {
+        std::vector<int> unready_indexes;
+        for (int i = 0; i < questions_list_->count(); ++i) {
+          if (GetStatus(questions_list_->item(i)) != QuestionStatus::kReady) {
+            unready_indexes.push_back(i);
+          }
+        }
+        auto it = SelectRandomly(unready_indexes.begin(),
+                                 unready_indexes.end());
+        if (it != unready_indexes.end()) {
+          ChooseNewItem(*it);
+        }
+      });
 }
 
 void MainWindow::SetupMainLayout() {
@@ -81,15 +107,19 @@ void MainWindow::SetupMainLayout() {
   count_ = new QSpinBox(widget_);
   questions_list_ = new QListWidget(widget_);
   question_view_ = new QGroupBox(widget_);
+  next_question_ = new QPushButton(widget_);
+  next_question_->setText("Следующий билет");
 
   question_view_->setVisible(false);
 
-  layout_->addWidget(count_, 0, 0);
-  layout_->addWidget(questions_list_, 1, 1);
-  layout_->addWidget(question_view_, 2, 1);
+  layout_->addWidget(count_, 0, 0, 1, 1);
+  layout_->addWidget(next_question_, 1, 0, Qt::AlignTop);
+  layout_->addWidget(questions_list_, 1, 1, 2, 2);
+  layout_->addWidget(question_view_, 3, 1, 1, 2);
 
   layout_->setColumnStretch(0, 1);
-  layout_->setColumnStretch(1, 5);
+  layout_->setColumnStretch(1, 3);
+  layout_->setColumnStretch(2, 3);
 
   widget_->setLayout(layout_);
 }
@@ -130,17 +160,7 @@ void MainWindow::FillQuestionNumberAndName(QListWidgetItem* item) {
 }
 
 void MainWindow::FillQuestionStatus(QListWidgetItem* item) {
-  auto color = item->background();
-  if (color == Qt::green) {
-    question_status_->setCurrentIndex(
-        static_cast<int>(QuestionStatus::kReady));
-  } else if (color == Qt::yellow) {
-    question_status_->setCurrentIndex(
-        static_cast<int>(QuestionStatus::kNeedToRepeat));
-  } else {
-    question_status_->setCurrentIndex(
-        static_cast<int>(QuestionStatus::kDefault));
-  }
+  question_status_->setCurrentIndex(static_cast<int>(GetStatus(item)));
 }
 
 void MainWindow::UpdateQuestionStatus(
@@ -172,7 +192,21 @@ void MainWindow::UpdateQuestionName(
 
 void MainWindow::ChooseNewItem(int index) {
   auto* item = questions_list_->item(index);
+  questions_list_->setCurrentItem(item);
   question_view_->setVisible(true);
   FillQuestionNumberAndName(item);
   FillQuestionStatus(item);
+}
+
+MainWindow::QuestionStatus MainWindow::GetStatus(QListWidgetItem* item) {
+  QuestionStatus result;
+  auto color = item->background();
+  if (color == Qt::green) {
+    result = QuestionStatus::kReady;
+  } else if (color == Qt::yellow) {
+    result = QuestionStatus::kNeedToRepeat;
+  } else {
+    result = QuestionStatus::kDefault;
+  }
+  return result;
 }
