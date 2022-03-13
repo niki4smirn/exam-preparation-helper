@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include <QComboBox>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -7,9 +9,10 @@
 #include <QListWidget>
 #include <QLineEdit>
 #include <QMainWindow>
-#include <QSpinBox>
+#include <QProgressBar>
+#include <QProgressBar>
 #include <QPushButton>
-#include <optional>
+#include <QSpinBox>
 
 class MainWindow : public QMainWindow {
  Q_OBJECT
@@ -29,12 +32,18 @@ class MainWindow : public QMainWindow {
     kReady
   };
 
-  void UpdateQuestionStatus(QListWidgetItem* item, QuestionStatus status);
+  void UpdateQuestionStatus(QListWidgetItem* item, QuestionStatus new_status);
   void UpdateQuestionName(QListWidgetItem* item, const QString& new_name);
 
   static QuestionStatus GetStatus(QListWidgetItem* item);
 
   void ChooseNewItem(int index);
+
+  void UpdateQuestionTypeCounts(
+      QListWidgetItem* item,
+      QuestionStatus new_status);
+
+  void UpdateProgressBars();
 
   QWidget* widget_;
   QGridLayout* layout_;
@@ -52,6 +61,11 @@ class MainWindow : public QMainWindow {
   QPushButton* prev_question_;
   std::optional<int> prev_question_index;
   std::optional<int> cur_question_index;
+
+  QProgressBar* total_progress_;
+  QProgressBar* green_progress_;
+  int default_count_{0};
+  int green_count_{0};
 
   QSize minimal_size_{500, 500};
 };

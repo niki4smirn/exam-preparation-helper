@@ -30,6 +30,11 @@ void MainWindow::ConnectWidgets() {
         questions_list_->clear();
         prev_question_index.reset();
         cur_question_index.reset();
+        total_progress_->setMaximum(new_count);
+        green_progress_->setMaximum(new_count);
+        default_count_ = new_count;
+        green_count_ = 0;
+        UpdateProgressBars();
         for (int i = 1; i <= new_count; ++i) {
           auto* new_item =
               new QListWidgetItem(QString::number(i), questions_list_);
@@ -116,10 +121,14 @@ void MainWindow::SetupMainLayout() {
   count_ = new QSpinBox(widget_);
   questions_list_ = new QListWidget(widget_);
   question_view_ = new QGroupBox(widget_);
+
   next_question_ = new QPushButton(widget_);
   next_question_->setText("Следующий билет");
   prev_question_ = new QPushButton(widget_);
   prev_question_->setText("Предыдущий билет");
+
+  total_progress_ = new QProgressBar(widget_);
+  green_progress_ = new QProgressBar(widget_);
 
   question_view_->setVisible(false);
 
@@ -128,6 +137,8 @@ void MainWindow::SetupMainLayout() {
   layout_->addWidget(prev_question_, 2, 0, Qt::AlignTop);
   layout_->addWidget(questions_list_, 1, 1, 2, 2);
   layout_->addWidget(question_view_, 3, 1, 1, 2);
+  layout_->addWidget(total_progress_, 0, 1);
+  layout_->addWidget(green_progress_, 0, 2);
 
   layout_->setRowStretch(0, 1);
   layout_->setRowStretch(2, 1);
@@ -179,8 +190,10 @@ void MainWindow::FillQuestionStatus(QListWidgetItem* item) {
 
 void MainWindow::UpdateQuestionStatus(
     QListWidgetItem* item,
-    MainWindow::QuestionStatus status) {
-  switch (status) {
+    MainWindow::QuestionStatus new_status) {
+  UpdateQuestionTypeCounts(item, new_status);
+  UpdateProgressBars();
+  switch (new_status) {
     case QuestionStatus::kDefault: {
       item->setBackground(QBrush());
       break;
@@ -225,4 +238,30 @@ MainWindow::QuestionStatus MainWindow::GetStatus(QListWidgetItem* item) {
     result = QuestionStatus::kDefault;
   }
   return result;
+}
+
+void MainWindow::UpdateQuestionTypeCounts(
+    QListWidgetItem* item,
+    MainWindow::QuestionStatus new_status) {
+  if (new_status == QuestionStatus::kReady &&
+      GetStatus(item) != QuestionStatus::kReady) {
+    ++green_count_;
+  }
+  if (new_status != QuestionStatus::kReady &&
+      GetStatus(item) == QuestionStatus::kReady) {
+    --green_count_;
+  }
+  if (new_status == QuestionStatus::kDefault &&
+      GetStatus(item) != QuestionStatus::kDefault) {
+    ++default_count_;
+  }
+  if (new_status != QuestionStatus::kDefault &&
+      GetStatus(item) == QuestionStatus::kDefault) {
+    --default_count_;
+  }
+}
+
+void MainWindow::UpdateProgressBars() {
+  total_progress_->setValue(questions_list_->count() - default_count_);
+  green_progress_->setValue(green_count_);
 }
