@@ -17,12 +17,23 @@ MainWindow::MainWindow() :
 }
 
 void MainWindow::ConnectWidgets() {
-  connect(count_, QOverload<int>::of(&QSpinBox::valueChanged), [&](int i) {
-    while (i < questions_list_->count()) {
-      questions_list_->takeItem(questions_list_->count() - 1);
+  connect(count_,
+          QOverload<int>::of(&QSpinBox::valueChanged), [&](int new_count) {
+    questions_list_->clear();
+    for (int i = 1; i <= new_count; ++i) {
+      auto* new_item = new QListWidgetItem(QString::number(i), questions_list_);
+      new_item->setTextAlignment(Qt::AlignCenter);
+      questions_list_->addItem(new_item);
     }
-    while (i > questions_list_->count()) {
-      questions_list_->addItem(new QListWidgetItem(QString::number(i), questions_list_));
+  });
+
+  connect(questions_list_,
+          &QListWidget::itemDoubleClicked, [&](QListWidgetItem *item) {
+    if (item->background() == QBrush() ||
+        item->background() == Qt::yellow) {
+      item->setBackground(Qt::green);
+    } else {
+      item->setBackground(Qt::yellow);
     }
   });
 }
