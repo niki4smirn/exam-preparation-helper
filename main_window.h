@@ -9,6 +9,7 @@
 #include <QMainWindow>
 #include <QSpinBox>
 #include <QPushButton>
+#include <optional>
 
 class MainWindow : public QMainWindow {
  Q_OBJECT
@@ -48,6 +49,9 @@ class MainWindow : public QMainWindow {
   QComboBox* question_status_;
 
   QPushButton* next_question_;
+  QPushButton* prev_question_;
+  std::optional<int> prev_question_index;
+  std::optional<int> cur_question_index;
 
   QSize minimal_size_{500, 500};
 };

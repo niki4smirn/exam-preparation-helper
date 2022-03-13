@@ -28,6 +28,8 @@ void MainWindow::ConnectWidgets() {
   connect(count_,
           QOverload<int>::of(&QSpinBox::valueChanged), [&](int new_count) {
         questions_list_->clear();
+        prev_question_index.reset();
+        cur_question_index.reset();
         for (int i = 1; i <= new_count; ++i) {
           auto* new_item =
               new QListWidgetItem(QString::number(i), questions_list_);
@@ -98,6 +100,13 @@ void MainWindow::ConnectWidgets() {
           ChooseNewItem(*it);
         }
       });
+
+  connect(prev_question_,
+          &QPushButton::clicked, [&]() {
+        if (prev_question_index.has_value()) {
+          ChooseNewItem(prev_question_index.value());
+        }
+      });
 }
 
 void MainWindow::SetupMainLayout() {
@@ -109,14 +118,19 @@ void MainWindow::SetupMainLayout() {
   question_view_ = new QGroupBox(widget_);
   next_question_ = new QPushButton(widget_);
   next_question_->setText("Следующий билет");
+  prev_question_ = new QPushButton(widget_);
+  prev_question_->setText("Предыдущий билет");
 
   question_view_->setVisible(false);
 
   layout_->addWidget(count_, 0, 0, 1, 1);
   layout_->addWidget(next_question_, 1, 0, Qt::AlignTop);
+  layout_->addWidget(prev_question_, 2, 0, Qt::AlignTop);
   layout_->addWidget(questions_list_, 1, 1, 2, 2);
   layout_->addWidget(question_view_, 3, 1, 1, 2);
 
+  layout_->setRowStretch(0, 1);
+  layout_->setRowStretch(2, 1);
   layout_->setColumnStretch(0, 1);
   layout_->setColumnStretch(1, 3);
   layout_->setColumnStretch(2, 3);
@@ -191,6 +205,8 @@ void MainWindow::UpdateQuestionName(
 }
 
 void MainWindow::ChooseNewItem(int index) {
+  prev_question_index = cur_question_index;
+  cur_question_index = index;
   auto* item = questions_list_->item(index);
   questions_list_->setCurrentItem(item);
   question_view_->setVisible(true);
